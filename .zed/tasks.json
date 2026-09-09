@@ -1,0 +1,16 @@
+
+[
+  {
+    "label": "PostgreSQL: run current file",
+    "command": "docker exec -i typography_coursework_db psql -v ON_ERROR_STOP=1 -U ilyasemenov -d typography < \"$ZED_FILE\"",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "current",
+    "use_new_terminal": false
+  },
+  {
+    "label": "PostgreSQL: run selected query",
+    "command": "printf '%s\\n' \"$ZED_SELECTED_TEXT\" | docker exec -i typography_coursework_db psql -v ON_ERROR_STOP=1 -U ilyasemenov -d typography",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false
+  }
+]
