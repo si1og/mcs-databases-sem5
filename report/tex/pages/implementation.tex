@@ -1,29 +1,69 @@
 \section{Основная часть}
 
-\subsection{Создание представления}
+\subsection{Лабораторная работа № 1}
+
+\subsubsection{Задача}
+
+В ходе лабораторной работы необходимо:
+
+\begin{enumerate}
+    \item создать представление, содержащее результат группировки данных с
+    двумя агрегатными функциями \mintinline{sql}{COUNT};
+    \item составить простой запрос к созданному представлению с условием
+    \mintinline{sql}{WHERE};
+    \item составить запрос, в котором представление используется совместно с
+    операциями соединения \mintinline{sql}{JOIN}.
+\end{enumerate}
+
+Представление должно хранить число форматов и градаций насыщенности каждого
+начертания. Простой запрос должен определять число начертаний, поддерживающих
+больше $A$ форматов. Запрос с соединениями должен находить пять категорий с
+наибольшим охватом форматов.
+
+В формулах используются обозначения: $T$~--- таблица
+\mintinline{text}{Typeface}, $FF$~--- таблица
+\mintinline{text}{Font_family}, $C$~--- таблица
+\mintinline{text}{Category}, $V$~--- созданное представление. Символ
+$\bowtie$ обозначает соединение, $\sigma$~--- выборку, $\pi$~--- проекцию,
+$\gamma$~--- группировку с агрегированием.
+
+\subsubsection{Создание представления}
 
 Одно начертание может храниться в таблице \mintinline{text}{Typeface} в
 нескольких форматах и градациях насыщенности. Чтобы не выполнять одинаковый
-подсчёт в каждом запросе, создаётся отдельное представление. Оно называется
-\mintinline{sql}{typeface_format_weight_stats}.
+подсчёт в каждом запросе, создаётся отдельное представление.
 
 В нём для каждого начертания хранятся название, идентификатор гарнитуры, число
 форматов и число градаций насыщенности. Определение представления приведено в
 листинге~\ref{lst:create-view}.
 
-\codeListing[sql]{../src/create.sql}{Создание представления
-\mintinline{sql}{typeface_format_weight_stats}}{\label{lst:create-view}}
+\codeListing[sql]{../practice-01/src/create.sql}{Создание представления}{\label{lst:create-view}}
 
 Агрегатная функция \mintinline{sql}{COUNT(DISTINCT ...)} подсчитывает
 количество различных значений. Поэтому повторяющиеся форматы и градации
 насыщенности учитываются только один раз.
 
-\subsection{Проверка представления}
+Создание представления описывается формулой
+
+\[
+V = \gamma_{\substack{T.id\_font\_family,T.name;\\
+\operatorname{count\_distinct}(T.id\_format) \rightarrow format\_count,\\
+\operatorname{count\_distinct}(T.id\_weight) \rightarrow weight\_count}}(T).
+\]
+
+\subsubsection{Проверка представления}
 
 Для проверки из представления выбираются первые десять начертаний. Запрос
 приведён в листинге~\ref{lst:query-01}.
 
-\codeListing[sql]{../src/query-01.sql}{Проверка содержимого представления}{\label{lst:query-01}}
+\codeListing[sql]{../practice-01/src/query-01.sql}{Проверка содержимого представления}{\label{lst:query-01}}
+
+В реляционная формула имеет вид
+
+\[
+R_1 = \pi_{\substack{V.id\_font\_family,V.typeface\_name,\\
+V.format\_count,V.weight\_count}}(V).
+\]
 
 План и результат выполнения показаны на
 рисунках~\ref{fig:query-01-plan} и~\ref{fig:query-01-result}.
@@ -37,15 +77,23 @@
 \mintinline{sql}{weight_count}.
 
 \clearpage
-\subsection{Запрос с условием}
+\subsubsection{Запрос с условием}
 
 В запросе значение $A$ принято равным 2. Сначала условие
 \mintinline{sql}{format_count > 2} оставляет подходящие начертания, затем
 \mintinline{sql}{COUNT} подсчитывает их. Запрос приведён в
 листинге~\ref{lst:query-02}.
 
-\codeListing[sql]{../src/query-02.sql}{Подсчёт начертаний с числом форматов больше
+\codeListing[sql]{../practice-01/src/query-02.sql}{Подсчёт начертаний с числом форматов больше
 $A$}{\label{lst:query-02}}
+
+Запрос описывается формулой
+
+\[
+R_2 = \gamma_{\operatorname{count}(V.id\_font\_family)
+\rightarrow typeface\_count}
+\left(\sigma_{V.format\_count>A}(V)\right).
+\]
 
 План и результат выполнения показаны на
 рисунках~\ref{fig:query-02-plan} и~\ref{fig:query-02-result}.
@@ -56,15 +104,26 @@ $A$}{\label{lst:query-02}}
 
 Условию соответствует 39 начертаний.
 
-\subsection{Охват форматов по категориям}
+\subsubsection{Охват форматов по категориям}
 
 Представление содержит идентификатор гарнитуры, поэтому его можно соединить с
 таблицами \mintinline{text}{Font_family} и \mintinline{text}{Category}. После
 соединения значения \mintinline{sql}{format_count} суммируются отдельно для
 каждой категории. Запрос приведён в листинге~\ref{lst:query-03}.
 
-\codeListing[sql]{../src/query-03.sql}{Первые пять категорий по охвату
+\codeListing[sql]{../practice-01/src/query-03.sql}{Первые пять категорий по охвату
 поддерживаемых форматов}{\label{lst:query-03}}
+
+Агрегирование по категориям и выбор первых пяти строк описываются формулами
+
+\[
+\begin{aligned}
+Q &= \gamma_{\substack{C.id\_category,C.name;\\
+\operatorname{sum}(V.format\_count) \rightarrow format\_count}}
+(V \bowtie FF \bowtie C),\\
+R_3 &= \operatorname{top}_{5}^{format\_count\downarrow,\,C.name}(Q).
+\end{aligned}
+\]
 
 Представление уже содержит число форматов каждого начертания, поэтому повторно
 считать их в запросе не требуется. План и результат выполнения показаны на
