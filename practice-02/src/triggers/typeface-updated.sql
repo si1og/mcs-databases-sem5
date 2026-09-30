@@ -30,6 +30,8 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS typeface_updated ON typeface;
+
 CREATE TRIGGER typeface_updated
 AFTER UPDATE OF id_font_family, name, id_format, id_weight ON typeface
 FOR EACH ROW

@@ -3,6 +3,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
+    -- удаляем начертание и обновляем значение в табличке
     DELETE FROM typeface_format_weight_stats
     WHERE id_font_family = OLD.id_font_family
       AND typeface_name = OLD.name;
@@ -22,9 +23,11 @@ BEGIN
         t.id_font_family,
         t.name;
 
-    RETURN OLD;
+    RETURN NULL;
 END;
 $$;
+
+DROP TRIGGER IF EXISTS typeface_deleted ON typeface;
 
 CREATE TRIGGER typeface_deleted
 AFTER DELETE ON typeface

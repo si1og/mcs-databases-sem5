@@ -2,6 +2,7 @@ ALTER TABLE typeface
 ALTER CONSTRAINT typeface_id_font_family_fkey
 DEFERRABLE INITIALLY DEFERRED;
 
+-- обновляем таблицы дальше по цепочке
 CREATE OR REPLACE FUNCTION font_family_updated_fn()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -18,6 +19,8 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+
+DROP TRIGGER IF EXISTS font_family_updated ON font_family;
 
 CREATE TRIGGER font_family_updated
 BEFORE UPDATE OF id_font_family ON font_family

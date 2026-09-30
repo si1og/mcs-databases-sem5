@@ -26,6 +26,8 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS typeface_inserted ON typeface;
+
 CREATE TRIGGER typeface_inserted
 AFTER INSERT ON typeface
 FOR EACH ROW

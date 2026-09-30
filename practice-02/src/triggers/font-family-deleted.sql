@@ -1,3 +1,4 @@
+-- удаляем всё дальше по цепочке
 CREATE OR REPLACE FUNCTION font_family_deleted_fn()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -12,6 +13,8 @@ BEGIN
     RETURN OLD;
 END;
 $$;
+
+DROP TRIGGER IF EXISTS font_family_deleted ON font_family;
 
 CREATE TRIGGER font_family_deleted
 BEFORE DELETE ON font_family
