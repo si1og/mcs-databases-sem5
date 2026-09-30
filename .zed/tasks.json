@@ -8,6 +8,20 @@
     "use_new_terminal": false
   },
   {
+    "label": "PostgreSQL: run current file from reader user",
+    "command": "docker exec -e PGPASSWORD=stats_reader -i typography_coursework_db psql -v ON_ERROR_STOP=1 -U stats_reader -d typography < \"$ZED_FILE\"",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "current",
+    "use_new_terminal": false
+  },
+  {
+    "label": "PostgreSQL: run current file from source editor user",
+    "command": "docker exec -e PGPASSWORD=source_editor -i typography_coursework_db psql -v ON_ERROR_STOP=1 -U source_editor -d typography < \"$ZED_FILE\"",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "current",
+    "use_new_terminal": false
+  },
+  {
     "label": "PostgreSQL: run selected query",
     "command": "printf '%s\\n' \"$ZED_SELECTED_TEXT\" | docker exec -i typography_coursework_db psql -v ON_ERROR_STOP=1 -U ilyasemenov -d typography",
     "cwd": "$ZED_WORKTREE_ROOT",
