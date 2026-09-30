@@ -200,7 +200,7 @@
 
 % Font_family.id_Font_family -> Typeface.id_Font_family
 \draw[db schema link] ([xshift=\xWestShift]ff_pk.west)
-    -- ++(-2.2em,0) node[db schema cardinality, above] {1}
+    -- ++(-\hgap,0) node[db schema cardinality, below] {1}
     |- ++(-42em,6em)
     |- ([xshift={-\hgap + \xWestShift}]tf_fk_ff.west)
     -- node[db schema cardinality, below, xshift=-1em] {$\infty$}
