@@ -25,10 +25,132 @@
     \item удаление начертания из таблицы \mintinline{text}{Typeface}.
 \end{enumerate}
 
-В рамках работы была подготовлена обновлённая схема базы данных: в неё
-добавлена таблица статистики, возле таблиц \mintinline{text}{Font_family} и
-\mintinline{text}{Typeface} указаны соответствующие триггеры, а их воздействие
-на агрегированные данные показано пунктирными стрелками.
+Обновлённая схема базы данных представлена на
+рисунке~\ref{fig:db-schema-triggers}.
+
+\subsubsection{Реализация триггеров}
+
+В PostgreSQL обработчик триггера оформляется в виде функции, возвращающей
+значение типа \mintinline{sql}{TRIGGER}. После объявления функции команда
+\mintinline{sql}{CREATE TRIGGER} связывает её с таблицей, событием и моментом
+выполнения.
+
+\textbf{Триггер \mintinline{text}{font_family_updated}.}
+Триггер выполняется перед изменением идентификатора гарнитуры. Он переносит на
+новый идентификатор строки таблицы статистики и связанные начертания. Внешний
+ключ \mintinline{sql}{typeface.id_font_family} объявляется отложенным, поэтому
+его проверка производится после завершения изменения гарнитуры. Реализация
+триггера приведена в листинге~\ref{lst:font-family-updated-trigger}.
+
+\codeListing[sql]{../practice-02/src/triggers/font-family-updated.sql}
+{Триггер изменения гарнитуры}
+{\label{lst:font-family-updated-trigger}}
+
+\textbf{Триггер \mintinline{text}{font_family_deleted}.}
+Триггер выполняется перед удалением гарнитуры. Сначала он удаляет принадлежащие
+ей начертания, после чего удаляет соответствующие агрегированные строки. Это
+позволяет выполнить операцию без каскадного удаления на уровне внешнего ключа.
+Реализация приведена в листинге~\ref{lst:font-family-deleted-trigger}.
+
+\codeListing[sql]{../practice-02/src/triggers/font-family-deleted.sql}
+{Триггер удаления гарнитуры}
+{\label{lst:font-family-deleted-trigger}}
+
+\textbf{Триггер \mintinline{text}{typeface_inserted}.}
+После добавления начертания триггер подсчитывает число различных форматов и
+градаций насыщенности для соответствующей пары из идентификатора гарнитуры и
+названия начертания. Если агрегированная строка уже существует, её значения
+обновляются конструкцией \mintinline{sql}{ON CONFLICT}. Реализация приведена в
+листинге~\ref{lst:typeface-inserted-trigger}.
+
+\codeListing[sql]{../practice-02/src/triggers/typeface-inserted.sql}
+{Триггер добавления начертания}
+{\label{lst:typeface-inserted-trigger}}
+
+\textbf{Триггер \mintinline{text}{typeface_updated}.}
+Триггер запускается после изменения гарнитуры, названия, формата или
+насыщенности начертания. Старая агрегированная строка удаляется, затем по
+актуальным данным заново рассчитываются показатели старой и новой групп.
+Реализация приведена в листинге~\ref{lst:typeface-updated-trigger}.
+
+\codeListing[sql]{../practice-02/src/triggers/typeface-updated.sql}
+{Триггер изменения начертания}
+{\label{lst:typeface-updated-trigger}}
+
+\textbf{Триггер \mintinline{text}{typeface_deleted}.}
+После удаления начертания триггер удаляет прежнюю агрегированную строку и
+повторно рассчитывает её по оставшимся начертаниям. Если записей с такой парой
+гарнитуры и названия больше нет, новая строка не создаётся. Реализация
+приведена в листинге~\ref{lst:typeface-deleted-trigger}.
+
+\codeListing[sql]{../practice-02/src/triggers/typeface-deleted.sql}
+{Триггер удаления начертания}
+{\label{lst:typeface-deleted-trigger}}
+
+\subsubsection{Проверка работы триггеров}
+
+Для каждого триггера подготовлен отдельный тестовый запрос. Все проверки
+выполняются внутри транзакции, которая завершается командой
+\mintinline{sql}{ROLLBACK}; поэтому тестовые изменения не сохраняются в базе
+данных. Рассмотренные сценарии приведены в таблице~\ref{table:trigger-tests}.
+
+\begin{table}[H]
+    \centering
+    \caption{Примеры работы триггеров}
+    \label{table:trigger-tests}
+    \begin{tblr}{
+        width=\textwidth,
+        colspec={Q[c,2.2em]X[l]},
+        hlines,
+        vlines,
+        row{1}={font=\bfseries},
+        rows={valign=t},
+    }
+        № & Действие \\
+        1 & Изменение идентификатора гарнитуры
+        (\mintinline{sql}{UPDATE id_font_family} в
+        \mintinline{text}{Font_family}). Идентификатор изменяется в связанных
+        начертаниях и строках \mintinline{text}{Typeface_format_weight_stats}.
+        \\
+        2 & Удаление гарнитуры (\mintinline{sql}{DELETE} из
+        \mintinline{text}{Font_family}). Связанные начертания и агрегированные
+        строки удаляются триггером. \\
+        3 & Добавление начертания (\mintinline{sql}{INSERT} в
+        \mintinline{text}{Typeface}). В таблице статистики создаётся новая
+        строка либо пересчитываются существующие счётчики. \\
+        4 & Изменение начертания (\mintinline{sql}{UPDATE} полей
+        \mintinline{sql}{id_font_family}, \mintinline{sql}{name},
+        \mintinline{sql}{id_format} или \mintinline{sql}{id_weight}).
+        Показатели старой и новой групп пересчитываются. \\
+        5 & Удаление начертания (\mintinline{sql}{DELETE} из
+        \mintinline{text}{Typeface}). Счётчики группы пересчитываются, а при
+        отсутствии других начертаний агрегированная строка удаляется. \\
+    \end{tblr}
+\end{table}
+
+Результаты выполнения тестовых запросов представлены на
+рисунках~\ref{fig:font-family-updated-result}--
+\ref{fig:typeface-deleted-result}.
+
+\img[0.9]{img/font-family-updated-result.png}
+{Результат изменения идентификатора гарнитуры}
+{\label{fig:font-family-updated-result}}
+
+\img[0.35]{img/font-family-deleted-result.png}
+{Результат удаления гарнитуры}
+{\label{fig:font-family-deleted-result}}
+
+\img[0.9]{img/typeface-inserted-result.png}
+{Результат добавления начертания}
+{\label{fig:typeface-inserted-result}}
+
+\img[0.9]{img/typeface-updated-result.png}
+{Результат изменения начертания}
+{\label{fig:typeface-updated-result}}
+
+\img[0.3]{img/typeface-deleted-result.png}
+{Результат удаления начертания}
+{\label{fig:typeface-deleted-result}}
 
 \subsubsection{Схема базы данных}
 

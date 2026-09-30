@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW typeface_format_weight_stats AS
+CREATE OR REPLACE VIEW typeface_format_weight_stats_view AS
 SELECT
     t.id_font_family,
     t.name AS typeface_name,
