@@ -1,0 +1,296 @@
+\documentclass[a3paper, landscape]{article}
+\usepackage{poly-report}
+\geometry{left=0cm, right=0cm, top=0cm, bottom=0cm}
+\thispagestyle{empty}
+
+\begin{document}
+\begin{figure}[p]
+\centering
+\scalebox{0.82}{
+\begin{tikzpicture}[remember picture]
+
+% === Shifts ===
+\def\hgap{1.7em}
+\def\xWestShift{-3.4em}
+\def\xEastShift{12.1em}
+\def\dxWestShift{-3.4em}
+\def\dxEastShift{7.1em}
+\def\oneRowTablesLinkMargin{7.9em}
+\def\tableHgap{27em}
+
+\tikzset{
+    trigger bubble/.style={
+        draw,
+        align=left,
+        font=\ttfamily\scriptsize,
+        inner sep=0.5em,
+    },
+    trigger action/.style={
+        dashed,
+        -latex,
+        thin,
+    },
+    trigger action label/.style={
+        font=\ttfamily\scriptsize,
+        fill=white,
+        inner sep=1pt,
+    },
+}
+
+% ==================== MAIN TABLES ====================
+
+% === Row 1 ===
+
+\dbSchemaTable{ff}{\tableHgap,10em}{
+    \SetCell[c=2]{c} Font\_family & \\
+    PK & \dbFieldMark{ff_pk}{id\_Font\_family} \\
+       & Name \\
+       & Year\_created \\
+       & Description \\
+       & Typeface\_count \\
+    FK & \dbFieldMark{ff_fk_cat}{id\_Category} \\
+}
+
+\dbSchemaTable{cat}{\tableHgap * 2,10em}{
+    \SetCell[c=2]{c} Category & \\
+    PK & \dbFieldMark{cat_pk}{id\_Category} \\
+       & Name \\
+       & Description \\
+       & Icon \\
+       & Font\_family\_count \\
+}
+
+% === Row 2 ===
+
+\dbSchemaTable{tf}{\tableHgap,-25em}{
+    \SetCell[c=2]{c} Typeface & \\
+    PK & \dbFieldMark{tf_pk}{id\_Typeface} \\
+       & Name \\
+    FK & \dbFieldMark{tf_fk_w}{id\_Weight} \\
+    FK & \dbFieldMark{tf_fk_sl}{id\_Slope} \\
+       & File\_size \\
+    FK & \dbFieldMark{tf_fk_ff}{id\_Font\_family} \\
+    FK & \dbFieldMark{tf_fk_fmt}{id\_Format} \\
+}
+
+\dbSchemaTable{fmt}{\tableHgap * 2,-18em}{
+    \SetCell[c=2]{c} Format & \\
+    PK & \dbFieldMark{fmt_pk}{id\_Format} \\
+       & Name \\
+    FK & \dbFieldMark{fmt_fk_ext}{id\_Extension} \\
+       & Year\_released \\
+       & Description \\
+       & Web\_support \\
+}
+
+% === Row 3 ===
+
+\dbSchemaTable{lang}{2em,-18em}{
+    \SetCell[c=2]{c} Language & \\
+    PK & \dbFieldMark{lang_pk}{id\_Language} \\
+       & Name \\
+       & ISO\_code \\
+    FK & \dbFieldMark{lang_fk_wd}{id\_Writing\_direction} \\
+    FK & \dbFieldMark{lang_fk_st}{id\_Script\_type} \\
+}
+
+\dbSchemaTable{alph}{2em,10em}{
+    \SetCell[c=2]{c} Symbol & \\
+    PK & \dbFieldMark{alph_pk}{id\_Symbol} \\
+       & Value \\
+       & Unicode\_code \\
+    FK & \dbFieldMark{alph_fk_tf}{id\_Typeface} \\
+    FK & \dbFieldMark{alph_fk_lang}{id\_Language} \\
+}
+
+% Aggregate table maintained by triggers. Relationships are intentionally
+% omitted until the trigger design is finalized.
+\dbSchemaTable[16em][1-2,4]{tf_stats}{\tableHgap,-5em}{
+    \SetCell[c=2]{c} Typeface\_format\_weight\_stats & \\
+    PK & id\_Font\_family \\
+    PK & Typeface\_name \\
+       & Format\_count \\
+       & Weight\_count \\
+}
+
+% ==================== TRIGGERS ====================
+
+\node[trigger bubble, anchor=south west] (ff_triggers)
+    at ([xshift=2em,yshift=2.5em]ff.north east) {
+        triggers:\\
+        font\_family\_updated\\
+        font\_family\_deleted
+    };
+\draw[thin] (ff_triggers.south west) -- (ff.north east);
+
+\node[trigger bubble, anchor=north west] (tf_triggers)
+    at ([xshift=5em,yshift=-2em]tf.south east) {
+        triggers:\\
+        typeface\_inserted\\
+        typeface\_updated\\
+        typeface\_deleted
+    };
+\draw[thin] (tf_triggers.north west) -- (tf.south east);
+
+% Font_family changes update or remove rows of the aggregate table.
+\draw[trigger action]
+    ([xshift=-3em]ff.south) --
+    node[trigger action label, left] {UPDATE}
+    ([xshift=-3em]tf_stats.north);
+\draw[trigger action]
+    ([xshift=3em]ff.south) --
+    node[trigger action label, left] {DELETE}
+    ([xshift=3em]tf_stats.north);
+
+% Typeface changes recalculate the corresponding aggregate row.
+\draw[trigger action]
+    ([xshift=-6em]tf.north) --
+    node[trigger action label, pos=0.5, left] {INSERT}
+    ([xshift=-6em]tf_stats.south);
+\draw[trigger action]
+    ([xshift=-3em]tf.north) --
+    node[trigger action label, pos=0.5, left] {UPDATE}
+    ([xshift=-3em]tf_stats.south);
+\draw[trigger action]
+    (tf.north) --
+    node[trigger action label, pos=0.5, left] {DELETE}
+    (tf_stats.south);
+
+% ==================== DICTIONARIES ====================
+
+\dbSchemaDictionary{d_wd}{-18em,-12em}{
+    \SetCell[c=2]{c} Writing\_direction & \\
+    PK & \dbFieldMark{d_wd_pk}{id\_Writing\_dir.} \\
+       & Name \\
+}
+
+\dbSchemaDictionary{d_st}{-18em,-20em}{
+    \SetCell[c=2]{c} Script\_type & \\
+    PK & \dbFieldMark{d_st_pk}{id\_Script\_type} \\
+       & Name \\
+}
+
+\dbSchemaDictionary{d_weight}{33em,-17em}{
+    \SetCell[c=2]{c} Weight & \\
+    PK & \dbFieldMark{d_weight_pk}{id\_Weight} \\
+       & Name \\
+}
+
+\dbSchemaDictionary{d_slope}{50em,-7em}{
+    \SetCell[c=2]{c} Slope & \\
+    PK & \dbFieldMark{d_slope_pk}{id\_Slope} \\
+       & Name \\
+}
+
+\dbSchemaDictionary{d_ext}{72em,-21.1em}{
+    \SetCell[c=2]{c} Extension & \\
+    PK & \dbFieldMark{d_ext_pk}{id\_Extension} \\
+       & Name \\
+}
+
+% ==================== СВЯЗИ ОСНОВНЫХ ТАБЛИЦ ====================
+
+% Font_family.id_Category -> Category.id_Category
+\draw[db schema link] ([xshift=\xEastShift]ff_fk_cat.west)
+    -- ++(\hgap,0) node[db schema cardinality, below] {$\infty$}
+    node[db schema annotation, below, yshift=-0.5em] {15--20}
+    |- ++(\oneRowTablesLinkMargin,0)
+    |- ([xshift={-\hgap + \xWestShift}]cat_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\xWestShift]cat_pk.west);
+
+% Font_family.id_Font_family -> Typeface.id_Font_family
+\draw[db schema link] ([xshift=\xWestShift]ff_pk.west)
+    -- ++(-2.2em,0) node[db schema cardinality, above] {1}
+    |- ++(-42em,6em)
+    |- ([xshift={-\hgap + \xWestShift}]tf_fk_ff.west)
+    -- node[db schema cardinality, below, xshift=-1em] {$\infty$}
+    node[db schema annotation, below, xshift=-1em, yshift=-0.5em] {18--22}
+    ([xshift=\xWestShift]tf_fk_ff.west);
+
+% Typeface.id_Format -> Format.id_Format
+\draw[db schema link] ([xshift=\xEastShift]tf_fk_fmt.west)
+    -- ++(\hgap*5,0) node[db schema cardinality, below] {$\infty$}
+    |- ([xshift={-\hgap + \xWestShift}]fmt_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\xWestShift]fmt_pk.west);
+
+% Symbol.id_Typeface -> Typeface.id_Typeface
+\draw[db schema link] ([xshift=\xEastShift]alph_fk_tf.west)
+    -- ++(\hgap,0)
+    -- ++(0, -3.35em)
+    node[db schema cardinality, above] {$\infty$}
+    node[db schema annotation, below, fill=white] {2--5 languages per typeface}
+    |- ([xshift={-\hgap + \xWestShift}]tf_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\xWestShift]tf_pk.west);
+
+% Symbol.id_Language -> Language.id_Language
+\draw[db schema link] ([xshift=\xWestShift]alph_fk_lang.west)
+    -- ++(-\hgap,0)
+    -- ++(0, -2em)
+    node[db schema cardinality, above] {$\infty$}
+    node[db schema annotation, below, fill=white] {33--45 symbols per pair}
+    |- ([xshift=\xWestShift]lang_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\xWestShift]lang_pk.west);
+
+% ==================== DICTIONARY RELATIONSHIPS ====================
+
+% Typeface.id_Weight -> Weight.id_Weight
+\draw[db schema link] ([xshift=\xEastShift]tf_fk_w.west)
+    -- ++(\hgap*3,0) node[db schema cardinality, below] {$\infty$}
+    |- ([xshift=\hgap]d_weight.east)
+    -- node[db schema cardinality, above] {1}
+    (d_weight.east);
+
+% Typeface.id_Slope -> Slope.id_Slope
+\draw[db schema link] ([xshift=\xEastShift]tf_fk_sl.west)
+    -- ++(\hgap*4,0) node[db schema cardinality, below] {$\infty$}
+    |- ($ (d_slope.west |- d_slope_pk.west) + (-\hgap,0) $)
+    -- node[db schema cardinality, above] {1}
+    (d_slope.west |- d_slope_pk.west);
+
+% Format.id_Extension -> Extension.id_Extension
+\draw[db schema link] ([xshift=\xEastShift]fmt_fk_ext.west)
+    -- ++(\hgap,0) node[db schema cardinality, above] {$\infty$}
+    |- ([xshift={-\hgap + \dxWestShift}]d_ext_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\dxWestShift]d_ext_pk.west);
+
+% Language.id_Writing_direction -> Writing_direction.id_Writing_direction
+\draw[db schema link] ([xshift=\xWestShift]lang_fk_wd.west)
+    -- ++(-\hgap*1.5,0) node[db schema cardinality, below] {$\infty$}
+    |- ([xshift={\hgap + \dxEastShift}]d_wd_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\dxEastShift]d_wd_pk.west);
+
+% Language.id_Script_type -> Script_type.id_Script_type
+\draw[db schema link] ([xshift=\xWestShift]lang_fk_st.west)
+    -- ++(-\hgap*2,0) node[db schema cardinality, below] {$\infty$}
+    |- ([xshift={\hgap + \dxEastShift}]d_st_pk.west)
+    -- node[db schema cardinality, above] {1} ([xshift=\dxEastShift]d_st_pk.west);
+
+
+% ==================== LEVELS, COEFFICIENT RANGE, RECORD COUNT ====================
+
+% Annotation format:
+% level; coefficient range; record count
+
+% Base table
+\node[db schema annotation, above=0.3em of cat] {1; --; 12};
+
+% Dictionaries
+\node[db schema annotation, above=0.3em of d_wd] {1; --; 2};
+\node[db schema annotation, above=0.3em of d_st] {1; --; 3};
+\node[db schema annotation, above=0.3em of d_weight] {1; --; 9};
+\node[db schema annotation, above=0.3em of d_slope] {1; --; 3};
+\node[db schema annotation, above=0.3em of d_ext] {1; --; 5};
+
+% Tables depending on dictionaries
+\node[db schema annotation, above=0.3em of fmt] {2; --; 5};
+\node[db schema annotation, above=0.3em of lang] {2; --; 40};
+
+% Derived tables
+\node[db schema annotation, above=0.3em of ff] {2; 15--20; 208};
+\node[db schema annotation, above=0.3em of tf] {3; 18--22; 4148};
+\node[db schema annotation, above=0.3em of alph] {4; 2--5 and 33--45; 568476};
+
+\end{tikzpicture}
+}
+\end{figure}
+\end{document}
