@@ -21,6 +21,7 @@ BEGIN
     GROUP BY
         t.id_font_family,
         t.name
+    -- чтобы избежать ошибки дублирования первичного ключа
     ON CONFLICT (id_font_family, typeface_name)
     DO UPDATE SET
         format_count = EXCLUDED.format_count,
