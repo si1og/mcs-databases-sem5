@@ -1,5 +1,6 @@
 \documentclass[a3paper, landscape]{article}
 \usepackage{poly-report}
+\usetikzlibrary{tikzmark}
 \geometry{left=0cm, right=0cm, top=0cm, bottom=0cm}
 \thispagestyle{empty}
 
@@ -21,6 +22,7 @@
 \tikzset{
     trigger bubble/.style={
         draw,
+        rounded corners=6pt,
         align=left,
         font=\ttfamily\scriptsize,
         inner sep=0.5em,
@@ -62,7 +64,7 @@
 
 % === Row 2 ===
 
-\dbSchemaTable{tf}{\tableHgap,-25em}{
+\dbSchemaTable{tf}{\tableHgap,-30em}{
     \SetCell[c=2]{c} Typeface & \\
     PK & \dbFieldMark{tf_pk}{id\_Typeface} \\
        & Name \\
@@ -105,7 +107,7 @@
 
 % Aggregate table maintained by triggers. Relationships are intentionally
 % omitted until the trigger design is finalized.
-\dbSchemaTable[16em][1-2,4]{tf_stats}{\tableHgap,-5em}{
+\dbSchemaTable[16em][1-2,4]{tf_stats}{\tableHgap,-12em}{
     \SetCell[c=2]{c} Typeface\_format\_weight\_stats & \\
     PK & id\_Font\_family \\
     PK & Typeface\_name \\
@@ -116,45 +118,79 @@
 % ==================== TRIGGERS ====================
 
 \node[trigger bubble, anchor=south west] (ff_triggers)
-    at ([xshift=2em,yshift=2.5em]ff.north east) {
+    at ([xshift=-3em,yshift=-5em]ff.south west) {
         triggers:\\
-        font\_family\_updated\\
-        font\_family\_deleted
+        \tikzmarknode{ff_trigger_updated}{font\_family\_updated}\\
+        \tikzmarknode{ff_trigger_deleted}{font\_family\_deleted}
     };
-\draw[thin] (ff_triggers.south west) -- (ff.north east);
+
+% Связь таблицы с набором её триггеров
+\draw[thin]
+    ([xshift=2em]ff_triggers.north west) -- (ff.south west);
+
 
 \node[trigger bubble, anchor=north west] (tf_triggers)
-    at ([xshift=5em,yshift=-2em]tf.south east) {
+    at ([xshift=-3em,yshift=6em]tf.north west) {
         triggers:\\
-        typeface\_inserted\\
-        typeface\_updated\\
-        typeface\_deleted
+        \tikzmarknode{tf_trigger_inserted}{typeface\_inserted}\\
+        \tikzmarknode{tf_trigger_updated}{typeface\_updated}\\
+        \tikzmarknode{tf_trigger_deleted}{typeface\_deleted}
     };
-\draw[thin] (tf_triggers.north west) -- (tf.south east);
 
-% Font_family changes update or remove rows of the aggregate table.
-\draw[trigger action]
-    ([xshift=-3em]ff.south) --
-    node[trigger action label, left] {UPDATE}
-    ([xshift=-3em]tf_stats.north);
-\draw[trigger action]
-    ([xshift=3em]ff.south) --
-    node[trigger action label, left] {DELETE}
-    ([xshift=3em]tf_stats.north);
+% Связь таблицы с набором её триггеров
+\draw[thin]
+    ([xshift=2em]tf_triggers.south west) -- (tf.north west);
 
-% Typeface changes recalculate the corresponding aggregate row.
+
+% ==================== TRIGGER ACTIONS ====================
+
+% Font_family triggers -> aggregate table
+
 \draw[trigger action]
-    ([xshift=-6em]tf.north) --
-    node[trigger action label, pos=0.5, left] {INSERT}
-    ([xshift=-6em]tf_stats.south);
+    ([xshift=3.4em]ff_trigger_updated.south)
+    --
+    node[trigger action label, midway, sloped, above] {UPDATE}
+    ([xshift=2em]tf_stats.north);
+
 \draw[trigger action]
-    ([xshift=-3em]tf.north) --
-    node[trigger action label, pos=0.5, left] {UPDATE}
-    ([xshift=-3em]tf_stats.south);
+    ([xshift=3.4em]ff_trigger_deleted.south)
+    --
+    node[trigger action label, midway, sloped, above] {DELETE}
+    ([xshift=-2em]tf_stats.north);
+
+% Typeface triggers -> aggregate table
+
 \draw[trigger action]
-    (tf.north) --
-    node[trigger action label, pos=0.5, left] {DELETE}
-    (tf_stats.south);
+    ([xshift=3.4em]tf_trigger_inserted.north)
+    --
+    node[trigger action label, midway, sloped, above] {INSERT}
+    ([xshift=-1em]tf_stats.south);
+
+\draw[trigger action]
+    ([xshift=3.4em]tf_trigger_updated.north)
+    --
+    node[trigger action label, midway, sloped, above] {UPDATE}
+    ([xshift=1em]tf_stats.south);
+
+\draw[trigger action]
+    ([xshift=3.4em]tf_trigger_deleted.north)
+    --
+    node[trigger action label, midway, sloped, above] {DELETE}
+    ([xshift=3em]tf_stats.south);
+
+% Font_family triggers -> Typeface
+
+\draw[trigger action]
+    ([xshift=-3.4em]ff_trigger_updated.south)
+    to[out=-130, in=140]
+    node[trigger action label, pos=0.55, sloped, above] {UPDATE}
+    ([yshift=-2em]tf.north west);
+
+\draw[trigger action]
+    ([xshift=-3.4em]ff_trigger_deleted.south)
+    to[out=-130, in=140]
+    node[trigger action label, pos=0.45, sloped, above] {DELETE}
+    ([yshift=-1em]tf.north west);
 
 % ==================== DICTIONARIES ====================
 
@@ -170,7 +206,7 @@
        & Name \\
 }
 
-\dbSchemaDictionary{d_weight}{33em,-17em}{
+\dbSchemaDictionary{d_weight}{33em,-22em}{
     \SetCell[c=2]{c} Weight & \\
     PK & \dbFieldMark{d_weight_pk}{id\_Weight} \\
        & Name \\

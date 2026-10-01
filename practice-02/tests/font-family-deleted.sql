@@ -34,6 +34,11 @@ FROM typeface
 ORDER BY id_typeface
 LIMIT 1;
 
+-- показываем, что добавился
+SELECT *
+FROM typeface_format_weight_stats
+WHERE id_font_family = 10000;
+
 DELETE FROM font_family
 WHERE id_font_family = 10000;
 
