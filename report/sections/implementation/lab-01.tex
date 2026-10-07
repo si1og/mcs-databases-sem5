@@ -74,7 +74,7 @@ format\_count,weight\_count}}(V).
 План и результат выполнения показаны на
 рисунках~\ref{fig:query-01-plan} и~\ref{fig:query-01-result}.
 
-\img[0.85]{img/query-01-plan.png}{План выполнения запроса 1}{\label{fig:query-01-plan}}
+\img[0.85]{img/pr-01-query-01-plan.png}{План выполнения запроса 1}{\label{fig:query-01-plan}}
 
 PostgreSQL читает таблицы \mintinline{text}{Typeface},
 \mintinline{text}{Format} и \mintinline{text}{Weight}, затем соединяет их по
@@ -83,7 +83,7 @@ PostgreSQL читает таблицы \mintinline{text}{Typeface},
 \mintinline{text}{GroupAggregate} рассчитывает количество различных форматов
 и градаций насыщенности каждого начертания.
 
-\img[0.8]{img/query-01-result.png}{Результат выполнения запроса 1}{\label{fig:query-01-result}}
+\img[0.8]{img/pr-01-query-01-result.png}{Результат выполнения запроса 1}{\label{fig:query-01-result}}
 
 \clearpage
 \subsubsection{Запрос с условием}
@@ -110,7 +110,7 @@ R_2 = \gamma_{\operatorname{count}(id\_font\_family)
 План и результат выполнения показаны на
 рисунках~\ref{fig:query-02-plan} и~\ref{fig:query-02-result}.
 
-\img[0.8]{img/query-02-plan.png}{План выполнения запроса 2}{\label{fig:query-02-plan}}
+\img[0.8]{img/pr-01-query-02-plan.png}{План выполнения запроса 2}{\label{fig:query-02-plan}}
 
 Сначала PostgreSQL соединяет таблицу начертаний с таблицами форматов и
 насыщенностей, после чего вычисляет строки представления с помощью сортировки
@@ -118,7 +118,7 @@ R_2 = \gamma_{\operatorname{count}(id\_font\_family)
 начертания, у которых число форматов не больше $A$. Затем узел
 \mintinline{text}{Aggregate} подсчитывает оставшиеся строки.
 
-\img[0.7]{img/query-02-result.png}{Результат выполнения запроса 2}{\label{fig:query-02-result}}
+\img[0.7]{img/pr-01-query-02-result.png}{Результат выполнения запроса 2}{\label{fig:query-02-result}}
 
 Условию соответствует 39 начертаний.
 
@@ -151,7 +151,7 @@ R_3 &= \operatorname{top}_{5}^{format\_count\downarrow,\,name\uparrow}(Q).
 считать их в запросе не требуется. План и результат выполнения показаны на
 рисунках~\ref{fig:query-03-plan} и~\ref{fig:query-03-result}.
 
-\img[0.65]{img/query-03-plan.png}{План выполнения запроса 3}{\label{fig:query-03-plan}}
+\img[0.65]{img/pr-01-query-03-plan.png}{План выполнения запроса 3}{\label{fig:query-03-plan}}
 
 PostgreSQL вычисляет представление, соединяя начертания с форматами и
 насыщенностями. Полученные строки дополнительно соединяются с гарнитурами и
@@ -159,7 +159,7 @@ PostgreSQL вычисляет представление, соединяя на�
 категориям. Завершающие сортировка и ограничение оставляют пять категорий с
 наибольшим охватом.
 
-\img[0.75]{img/query-03-result.png}{Результат выполнения запроса 3}{\label{fig:query-03-result}}
+\img[0.75]{img/pr-01-query-03-result.png}{Результат выполнения запроса 3}{\label{fig:query-03-result}}
 
 После группировки категории сортируются по убыванию охвата. Оператор
 \mintinline{sql}{LIMIT 5} оставляет первые пять строк. Наибольший охват в
