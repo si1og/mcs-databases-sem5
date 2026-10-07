@@ -46,13 +46,13 @@ $\bowtie_{k}$ обозначает соединение по полю $k$, $\sig
 Создание представления описывается формулой
 
 \[
-\begin{aligned}
-X &= \left(T \bowtie_{id\_format} F\right)
-    \bowtie_{id\_weight} W,\\
-V &= \gamma_{\substack{id\_font\_family,name;\\
+V = \gamma_{\substack{id\_font\_family,name;\\
 \operatorname{count\_distinct}(id\_format) \rightarrow format\_count,\\
-\operatorname{count\_distinct}(id\_weight) \rightarrow weight\_count}}(X).
-\end{aligned}
+\operatorname{count\_distinct}(id\_weight) \rightarrow weight\_count}}
+\left(
+    \left(T \bowtie_{id\_format} F\right)
+    \bowtie_{id\_weight} W
+\right).
 \]
 
 \subsubsection{Проверка представления}
@@ -134,18 +134,25 @@ R_2 = \gamma_{\operatorname{count}(id\_font\_family)
 \codeListing[sql]{../practice-01/src/query-03.sql}{Первые пять категорий по охвату
 поддерживаемых форматов}{\label{lst:query-03}}
 
-Агрегирование по категориям и выбор первых пяти строк описываются формулами
+Агрегирование по категориям и выбор первых пяти строк описываются формулой
 
+\begingroup
+\small
 \[
 \begin{aligned}
-X &= \left(V \bowtie_{id\_font\_family} FF\right)
-    \bowtie_{id\_category} C,\\
-Q &= \gamma_{\substack{id\_category,name;\\
-\operatorname{sum}(format\_count) \rightarrow format\_count}}
-(X),\\
-R_3 &= \operatorname{top}_{5}^{format\_count\downarrow,\,name\uparrow}(Q).
+R_3 ={}& \operatorname{top}_{5}^{format\_count\downarrow,\,name\uparrow}
+\biggl(\\
+&
+    \gamma_{\substack{id\_category,name;\\
+    \operatorname{sum}(format\_count) \rightarrow format\_count}}
+    \left(
+        \left(V \bowtie_{id\_font\_family} FF\right)
+        \bowtie_{id\_category} C
+    \right)
+\biggr).
 \end{aligned}
 \]
+\endgroup
 
 Представление уже содержит число форматов каждого начертания, поэтому повторно
 считать их в запросе не требуется. План и результат выполнения показаны на
