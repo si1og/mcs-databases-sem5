@@ -42,7 +42,7 @@
 
 \subsubsection{Тестовые примеры}
 
-Для проверки прав подготовлено восемь запросов. Каждый запрос выполняется без
+Для проверки прав подготовлено десять запросов. Каждый запрос выполняется без
 изменений сначала от имени \mintinline{text}{stats_reader}, затем от имени
 \mintinline{text}{source_editor}.
 
@@ -54,51 +54,60 @@
 {Чтение таблицы статистики}
 {\label{lst:pr-03-query-01}}
 
-Второй и третий запросы проверяют возможность непосредственного добавления и
-удаления строки таблицы статистики. Тексты запросов приведены в
-листингах~\ref{lst:pr-03-query-02} и~\ref{lst:pr-03-query-03}.
+Второй запрос проверяет возможность непосредственного добавления строки
+таблицы статистики. Третий запрос читает её по составному первичному ключу,
+а четвёртый удаляет. Тексты запросов приведены в
+листингах~\ref{lst:pr-03-query-02}--\ref{lst:pr-03-query-04}.
 
 \codeListing[sql]{../practice-03/tests/queries/02-insert-stats.sql}
 {Добавление строки таблицы статистики}
 {\label{lst:pr-03-query-02}}
 
-\codeListing[sql]{../practice-03/tests/queries/03-delete-stats.sql}
-{Удаление строки таблицы статистики}
+\codeListing[sql]{../practice-03/tests/queries/03-select-inserted-stats.sql}
+{Проверка добавленной строки таблицы статистики}
 {\label{lst:pr-03-query-03}}
 
-Четвёртый запрос добавляет тестовое начертание, копируя значения внешних
-ключей из первой существующей строки. Текст запроса приведён в
-листинге~\ref{lst:pr-03-query-04}.
-
-\codeListing[sql]{../practice-03/tests/queries/04-insert-typeface.sql}
-{Добавление тестового начертания}
+\codeListing[sql]{../practice-03/tests/queries/04-delete-stats.sql}
+{Удаление строки таблицы статистики}
 {\label{lst:pr-03-query-04}}
 
-Пятый запрос проверяет чтение исходной таблицы
-\mintinline{text}{Typeface}, а шестой изменяет название добавленного
-начертания. Тексты запросов приведены в
-листингах~\ref{lst:pr-03-query-05} и~\ref{lst:pr-03-query-06}.
+Пятый запрос добавляет тестовое начертание, копируя значения внешних
+ключей из первой существующей строки. Текст запроса приведён в
+листинге~\ref{lst:pr-03-query-05}.
 
-\codeListing[sql]{../practice-03/tests/queries/05-select-typeface.sql}
-{Чтение таблицы начертаний}
+\codeListing[sql]{../practice-03/tests/queries/05-insert-typeface.sql}
+{Добавление тестового начертания}
 {\label{lst:pr-03-query-05}}
 
-\codeListing[sql]{../practice-03/tests/queries/06-update-typeface.sql}
-{Изменение тестового начертания}
+Шестой запрос проверяет наличие добавленного начертания в исходной таблице
+\mintinline{text}{Typeface}. Седьмой запрос изменяет его название, а восьмой
+выбирает изменённую строку по идентификатору. Тексты запросов приведены в
+листингах~\ref{lst:pr-03-query-06}--\ref{lst:pr-03-query-08}.
+
+\codeListing[sql]{../practice-03/tests/queries/06-select-typeface.sql}
+{Проверка добавленного начертания}
 {\label{lst:pr-03-query-06}}
 
-Седьмой запрос обращается к таблице \mintinline{text}{Category}, права на
-которую не были назначены ни одному из пользователей. Восьмой запрос удаляет
-добавленное ранее тестовое начертание. Тексты запросов приведены в
-листингах~\ref{lst:pr-03-query-07} и~\ref{lst:pr-03-query-08}.
-
-\codeListing[sql]{../practice-03/tests/queries/07-select-category.sql}
-{Чтение таблицы без назначенных прав}
+\codeListing[sql]{../practice-03/tests/queries/07-update-typeface.sql}
+{Изменение тестового начертания}
 {\label{lst:pr-03-query-07}}
 
-\codeListing[sql]{../practice-03/tests/queries/08-delete-typeface.sql}
-{Удаление тестового начертания}
+\codeListing[sql]{../practice-03/tests/queries/08-select-updated-typeface.sql}
+{Проверка изменённого начертания}
 {\label{lst:pr-03-query-08}}
+
+Девятый запрос обращается к таблице \mintinline{text}{Category}, права на
+которую не были назначены ни одному из пользователей. Десятый запрос удаляет
+добавленное ранее тестовое начертание. Тексты запросов приведены в
+листингах~\ref{lst:pr-03-query-09} и~\ref{lst:pr-03-query-10}.
+
+\codeListing[sql]{../practice-03/tests/queries/09-select-category.sql}
+{Чтение таблицы без назначенных прав}
+{\label{lst:pr-03-query-09}}
+
+\codeListing[sql]{../practice-03/tests/queries/10-delete-typeface.sql}
+{Удаление тестового начертания}
+{\label{lst:pr-03-query-10}}
 
 \subsubsection{Результаты тестирования}
 
@@ -141,34 +150,42 @@
     \includegraphics[width=0.95\textwidth]{img/pr-03-query-02-result.png} & \\
 
     \SetCell[r=2]{c} 3 &
-    \SetCell[c=2]{l} \queryCell{DELETE FROM typeface\_format\_weight\_stats WHERE id\_font\_family = -1;} & \\
-    & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-03-result.png} & \\
+    \SetCell[c=2]{l} \queryCell{SELECT * FROM typeface\_format\_weight\_stats WHERE id\_font\_family = -1 AND typeface\_name = 'Permission test';} & \\
+    & \SetCell[c=2]{c} \rule{0pt}{18mm} & \\
 
     \SetCell[r=2]{c} 4 &
-    \SetCell[c=2]{l} \queryCell{INSERT INTO typeface (...) SELECT ... FROM typeface ORDER BY id\_typeface LIMIT 1;} & \\
+    \SetCell[c=2]{l} \queryCell{DELETE FROM typeface\_format\_weight\_stats WHERE id\_font\_family = -1;} & \\
     & \SetCell[c=2]{c}
     \includegraphics[width=0.95\textwidth]{img/pr-03-query-04-result.png} & \\
 
     \SetCell[r=2]{c} 5 &
-    \SetCell[c=2]{l} \queryCell{SELECT name FROM typeface LIMIT 3;} & \\
+    \SetCell[c=2]{l} \queryCell{INSERT INTO typeface (...) SELECT ... FROM typeface ORDER BY id\_typeface LIMIT 1;} & \\
     & \SetCell[c=2]{c}
     \includegraphics[width=0.95\textwidth]{img/pr-03-query-05-result.png} & \\
 
     \SetCell[r=2]{c} 6 &
-    \SetCell[c=2]{l} \queryCell{UPDATE typeface SET name = 'Permission test updated' WHERE id\_typeface = 1000000;} & \\
+    \SetCell[c=2]{l} \queryCell{SELECT id\_typeface, name FROM typeface WHERE name = 'Permission test';} & \\
     & \SetCell[c=2]{c}
     \includegraphics[width=0.95\textwidth]{img/pr-03-query-06-result.png} & \\
 
     \SetCell[r=2]{c} 7 &
-    \SetCell[c=2]{l} \queryCell{SELECT * FROM category LIMIT 3;} & \\
+    \SetCell[c=2]{l} \queryCell{UPDATE typeface SET name = 'Permission test updated' WHERE id\_typeface = 1000000;} & \\
     & \SetCell[c=2]{c}
     \includegraphics[width=0.95\textwidth]{img/pr-03-query-07-result.png} & \\
 
     \SetCell[r=2]{c} 8 &
+    \SetCell[c=2]{l} \queryCell{SELECT id\_typeface, name FROM typeface WHERE id\_typeface = 1000000;} & \\
+    & \SetCell[c=2]{c} \rule{0pt}{18mm} & \\
+
+    \SetCell[r=2]{c} 9 &
+    \SetCell[c=2]{l} \queryCell{SELECT * FROM category LIMIT 3;} & \\
+    & \SetCell[c=2]{c}
+    \includegraphics[width=0.95\textwidth]{img/pr-03-query-09-result.png} & \\
+
+    \SetCell[r=2]{c} 10 &
     \SetCell[c=2]{l} \queryCell{DELETE FROM typeface WHERE id\_typeface = 1000000;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-08-result.png} & \\
+    \includegraphics[width=0.95\textwidth]{img/pr-03-query-10-result.png} & \\
 \end{tblr}
 \end{table}
 
