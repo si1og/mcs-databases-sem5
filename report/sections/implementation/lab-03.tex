@@ -96,17 +96,17 @@
 {Проверка изменённого начертания}
 {\label{lst:pr-03-query-08}}
 
-Девятый запрос обращается к таблице \mintinline{text}{Category}, права на
-которую не были назначены ни одному из пользователей. Десятый запрос удаляет
-добавленное ранее тестовое начертание. Тексты запросов приведены в
+Девятый запрос удаляет добавленное ранее тестовое начертание. Десятый запрос
+обращается к таблице \mintinline{text}{Category}, права на которую не были
+назначены ни одному из пользователей. Тексты запросов приведены в
 листингах~\ref{lst:pr-03-query-09} и~\ref{lst:pr-03-query-10}.
 
-\codeListing[sql]{../practice-03/tests/queries/09-select-category.sql}
-{Чтение таблицы без назначенных прав}
+\codeListing[sql]{../practice-03/tests/queries/09-delete-typeface.sql}
+{Удаление тестового начертания}
 {\label{lst:pr-03-query-09}}
 
-\codeListing[sql]{../practice-03/tests/queries/10-delete-typeface.sql}
-{Удаление тестового начертания}
+\codeListing[sql]{../practice-03/tests/queries/10-select-category.sql}
+{Чтение таблицы без назначенных прав}
 {\label{lst:pr-03-query-10}}
 
 \subsubsection{Результаты тестирования}
@@ -121,6 +121,15 @@
     \begin{minipage}{0.9\textwidth}
         \raggedright\small\ttfamily #1
     \end{minipage}%
+}
+
+\newcommand{\resultImage}[1]{%
+    \begin{tikzpicture}[baseline=(result.base)]
+        \node[inner sep=0] (result) {%
+            \includegraphics[width=0.95\textwidth]{#1}%
+        };
+        \draw[white, line width=1.2pt] (result.north) -- (result.south);
+    \end{tikzpicture}%
 }
 
 \begin{table}[H]
@@ -142,50 +151,52 @@
     \SetCell[r=2]{c} 1 &
     \SetCell[c=2]{l} \queryCell{SELECT * FROM typeface\_format\_weight\_stats LIMIT 3;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-01-result.png} & \\
+    \resultImage{img/pr-03-query-01-result.png} & \\
 
     \SetCell[r=2]{c} 2 &
     \SetCell[c=2]{l} \queryCell{INSERT INTO typeface\_format\_weight\_stats (...) VALUES (-1, 'Permission test', 1, 1);} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-02-result.png} & \\
+    \resultImage{img/pr-03-query-02-result.png} & \\
 
     \SetCell[r=2]{c} 3 &
     \SetCell[c=2]{l} \queryCell{SELECT * FROM typeface\_format\_weight\_stats WHERE id\_font\_family = -1 AND typeface\_name = 'Permission test';} & \\
-    & \SetCell[c=2]{c} \rule{0pt}{18mm} & \\
+    & \SetCell[c=2]{c}
+    \resultImage{img/pr-03-query-03-result.png} & \\
 
     \SetCell[r=2]{c} 4 &
     \SetCell[c=2]{l} \queryCell{DELETE FROM typeface\_format\_weight\_stats WHERE id\_font\_family = -1;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-04-result.png} & \\
+    \resultImage{img/pr-03-query-04-result.png} & \\
 
     \SetCell[r=2]{c} 5 &
     \SetCell[c=2]{l} \queryCell{INSERT INTO typeface (...) SELECT ... FROM typeface ORDER BY id\_typeface LIMIT 1;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-05-result.png} & \\
+    \resultImage{img/pr-03-query-05-result.png} & \\
 
     \SetCell[r=2]{c} 6 &
     \SetCell[c=2]{l} \queryCell{SELECT id\_typeface, name FROM typeface WHERE name = 'Permission test';} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-06-result.png} & \\
+    \resultImage{img/pr-03-query-06-result.png} & \\
 
     \SetCell[r=2]{c} 7 &
     \SetCell[c=2]{l} \queryCell{UPDATE typeface SET name = 'Permission test updated' WHERE id\_typeface = 1000000;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-07-result.png} & \\
+    \resultImage{img/pr-03-query-07-result.png} & \\
 
     \SetCell[r=2]{c} 8 &
     \SetCell[c=2]{l} \queryCell{SELECT id\_typeface, name FROM typeface WHERE id\_typeface = 1000000;} & \\
-    & \SetCell[c=2]{c} \rule{0pt}{18mm} & \\
+    & \SetCell[c=2]{c}
+    \resultImage{img/pr-03-query-08-result.png} & \\
 
     \SetCell[r=2]{c} 9 &
-    \SetCell[c=2]{l} \queryCell{SELECT * FROM category LIMIT 3;} & \\
-    & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-09-result.png} & \\
-
-    \SetCell[r=2]{c} 10 &
     \SetCell[c=2]{l} \queryCell{DELETE FROM typeface WHERE id\_typeface = 1000000;} & \\
     & \SetCell[c=2]{c}
-    \includegraphics[width=0.95\textwidth]{img/pr-03-query-10-result.png} & \\
+    \resultImage{img/pr-03-query-09-result.png} & \\
+
+    \SetCell[r=2]{c} 10 &
+    \SetCell[c=2]{l} \queryCell{SELECT * FROM category LIMIT 3;} & \\
+    & \SetCell[c=2]{c}
+    \resultImage{img/pr-03-query-10-result.png} & \\
 \end{tblr}
 \end{table}
 
