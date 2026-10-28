@@ -1,0 +1,99 @@
+\subsection{Лабораторная работа № 4}
+
+\subsubsection{Задача}
+
+Выбрать уровень изоляции и аномалию параллельного выполнения транзакций.
+Сформировать сценарий из двух транзакций A и B, подтверждающий наличие или
+отсутствие аномалии в PostgreSQL, выполнить его в двух сеансах
+\mintinline{text}{psql} и обосновать результат.
+
+\subsubsection{Сценарий эксперимента}
+
+Выбраны уровень \mintinline{sql}{READ UNCOMMITTED} и фантомное чтение. В
+PostgreSQL данный уровень работает как \mintinline{sql}{READ COMMITTED}, а
+фантом проявляется, если повторный запрос с тем же условием видит новую
+зафиксированную строку.
+
+Транзакция A подсчитывает строки таблицы \mintinline{text}{Font_family},
+название которых начинается с \mintinline{text}{Phantom read test}.
+Транзакция B добавляет подходящую строку и фиксирует изменение, после чего A
+повторяет запрос. Команды приведены в
+листингах~\ref{lst:pr-04-transaction-a} и~\ref{lst:pr-04-transaction-b}.
+
+\codeListing[sql]{../practice-04/src/session-a.sql}
+{Сценарий транзакции A}
+{\label{lst:pr-04-transaction-a}}
+
+\clearpage
+\codeListing[sql]{../practice-04/src/session-b.sql}
+{Сценарий транзакции B}
+{\label{lst:pr-04-transaction-b}}
+
+Хронология выполнения команд представлена в
+таблице~\ref{table:pr-04-transactions}; прочерк обозначает отсутствие действия
+в соответствующем сеансе.
+
+\begin{aThreePortraitPage}
+
+\newcommand{\transactionImage}[1]{%
+    \includegraphics[width=0.94\linewidth]{#1}%
+}
+
+\begin{table}[H]
+\centering
+\caption{Выполнение сценария фантомного чтения на уровне
+\mintinline{sql}{READ UNCOMMITTED}}
+\label{table:pr-04-transactions}
+\begin{tblr}{
+    width=\textwidth,
+    colspec={Q[c,2.2em]X[c]X[c]},
+    hlines,
+    vlines,
+    row{1}={font=\bfseries},
+    rows={valign=m,rowsep=2pt},
+}
+    № & Действия транзакции A & Действия транзакции B \\
+
+    1 &
+    \transactionImage{img/pr-04-transaction-a-01-begin.png} &
+    --- \\
+
+    2 &
+    \transactionImage{img/pr-04-transaction-a-02-initial-read.png} &
+    --- \\
+
+    3 &
+    --- &
+    \transactionImage{img/pr-04-transaction-b-01-begin.png} \\
+
+    4 &
+    --- &
+    \transactionImage{img/pr-04-transaction-b-02-insert.png} \\
+
+    5 &
+    \transactionImage{img/pr-04-transaction-a-03-uncommitted-read.png} &
+    --- \\
+
+    6 &
+    --- &
+    \transactionImage{img/pr-04-transaction-b-03-commit.png} \\
+
+    7 &
+    \transactionImage{img/pr-04-transaction-a-04-committed-read.png} &
+    --- \\
+
+    8 &
+    \transactionImage{img/pr-04-transaction-a-05-commit.png} &
+    --- \\
+\end{tblr}
+\end{table}
+
+\end{aThreePortraitPage}
+
+\subsubsection{Результат}
+
+Результаты чтений в транзакции A равны $0 \rightarrow 0 \rightarrow 1$.
+Незавершённая вставка B не видна, поэтому грязное чтение отсутствует. После
+фиксации B тот же запрос видит новую строку, следовательно, наблюдается
+фантомное чтение. Это соответствует поведению \mintinline{sql}{READ COMMITTED}:
+каждый новый запрос видит изменения, которые другие транзакции уже зафиксировали.
