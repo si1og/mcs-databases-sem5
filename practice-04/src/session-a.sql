@@ -1,6 +1,3 @@
-DELETE FROM font_family
-WHERE name = 'Phantom read test family';
-
 BEGIN;
 SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 
