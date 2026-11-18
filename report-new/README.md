@@ -6,9 +6,9 @@
 лабораторных работ. Иллюстрации хранятся в `img/`, будущие диаграммы Typst —
 в `typ/graphics/`. Листинги читаются из каталогов `practice-01`—`practice-04`.
 
-Из старого LaTeX-отчёта напрямую подключается только диаграмма
+Из старого LaTeX-отчёта напрямую подключается диаграмма
 `../report/tex/graphics/db-schema-triggers.pdf`. Для практики № 5 отдельно
-подготовлена TikZ-схема `../report/tex/graphics/db-schema-author.tex/pdf`.
+подготовлена и подключена TikZ-схема `../report/tex/graphics/db-schema-author.tex/pdf`.
 Черновик `typ/graphics/db-schema-triggers.typ` пока не подключён к отчёту.
 Общие стили импортируются из соседнего репозитория `poly-report`.
 
@@ -28,5 +28,5 @@ typst compile --root /Users/ilyasemenov/poly \
 CM-Super, что и исходный LaTeX-отчёт; цветовая тема SQL-листингов находится в
 `poly-report/themes/lovelace.tmTheme`.
 
-Исходный LaTeX-отчёт остаётся в `../report/`. Typst-версия содержит те же
-28 страниц, включая три листа A3.
+Исходный LaTeX-отчёт остаётся в `../report/`. Раздел лабораторной № 5 пока
+содержит постановку задачи и схему; реализация будет добавлена позднее.

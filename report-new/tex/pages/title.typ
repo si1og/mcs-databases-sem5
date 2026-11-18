@@ -1,4 +1,5 @@
 // Титульный лист воспроизводит расположение блоков исходного отчёта.
+#set text(size: 14.35pt)
 #v(12mm)
 #align(center)[
   Министерство образования и науки Российской Федерации \
@@ -12,16 +13,30 @@
 
 #v(32mm)
 #align(center)[
+  #set text(font: "CM Super 1728", size: 17.22pt)
   Отчёт о выполнении лабораторных работ \
   По дисциплине: «Методы проектирования баз данных»
 ]
 
 #v(46.5mm)
+#let signature-line = box(width: 35mm, height: 0.7em, stroke: (bottom: 0.5pt))[]
 #grid(
-  columns: (1fr, 40mm, 34mm),
+  columns: (1fr,),
   row-gutter: 9mm,
-  [Выполнил студент \ группы 5130201/40002], [#box(width: 35mm, height: 0.7em, stroke: (bottom: 0.5pt))[]], [Семенов И. А.],
-  [Проверил \ преподаватель], [#box(width: 35mm, height: 0.7em, stroke: (bottom: 0.5pt))[]], [Попов С. Г.],
+  grid(
+    columns: (1fr, 38mm, auto),
+    align: (left, center + horizon, left + horizon),
+    [Выполнил студент \ группы 5130201/40101],
+    signature-line,
+    [Семенов И. А.],
+  ),
+  grid(
+    columns: (1fr, 38mm, auto),
+    align: (left, center + horizon, left + horizon),
+    [Проверил \ преподаватель],
+    signature-line,
+    [Попов С. Г.],
+  ),
 )
 
 #v(17.5mm)
