@@ -1,5 +1,7 @@
 // Титульный лист воспроизводит расположение блоков исходного отчёта.
-#set text(size: 14.35pt)
+#import "@local/poly-report:0.1.0": large, latex-size
+
+#set text(size: latex-size.normalsize)
 #v(12mm)
 #align(center)[
   Министерство образования и науки Российской Федерации \
@@ -12,11 +14,10 @@
 ]
 
 #v(32mm)
-#align(center)[
-  #set text(font: "CM Super 1728", size: 17.22pt)
+#align(center, large[
   Отчёт о выполнении лабораторных работ \
   По дисциплине: «Методы проектирования баз данных»
-]
+])
 
 #v(46.5mm)
 #let signature-line = box(width: 35mm, height: 0.7em, stroke: (bottom: 0.5pt))[]

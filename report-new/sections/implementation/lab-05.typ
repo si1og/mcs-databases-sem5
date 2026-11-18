@@ -1,4 +1,4 @@
-#import "../../../../../../poly-report/poly-report.typ": *
+#import "@local/poly-report:0.1.0": *
 #import "../../typ/graphics/add-typeface-flowchart.typ": add-typeface-flowchart
 
 #pagebreak()

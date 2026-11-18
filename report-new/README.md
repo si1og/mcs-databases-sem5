@@ -10,21 +10,24 @@
 `../report/tex/graphics/db-schema-triggers.pdf`. Для практики № 5 отдельно
 подготовлена и подключена TikZ-схема `../report/tex/graphics/db-schema-author.tex/pdf`.
 Черновик `typ/graphics/db-schema-triggers.typ` пока не подключён к отчёту.
-Общие стили импортируются из соседнего репозитория `poly-report`.
+Общие стили импортируются из локального пакета Typst `@local/poly-report:0.1.0`.
+
+Один раз зарегистрируйте локальный пакет и установите CM-Super в пользовательский
+каталог. Для конвертации нужны TeX Live с CM-Super и FontForge.
+
+```sh
+make -C /Users/ilyasemenov/poly/poly-report install-package install-fonts
+```
 
 Сборка из корня `practice-sem5` (Typst 0.15.1):
 
 ```sh
-make -C /Users/ilyasemenov/poly/poly-report cm-super-fonts
-typst compile --root /Users/ilyasemenov/poly \
-  --font-path /Users/ilyasemenov/poly/poly-report/fonts/cm-super \
-  report-new/report.typ report-new/report.pdf
+typst compile --root . report-new/report.typ report-new/report.pdf
 ```
 
-Для другой копии проекта укажите в `--root` общий родительский каталог,
-содержащий `poly-report` и `5sem/databases/practice-sem5`, а в `--font-path` —
-каталог `poly-report/fonts/cm-super`. Для подготовки шрифтов нужны TeX Live
-с CM-Super и FontForge. Основной текст, заголовки и код используют те же контуры
+Для пересборки при изменениях используйте `typst watch` с теми же аргументами.
+Корень проекта включает каталоги практик, откуда отчёт читает SQL и схемы.
+Основной текст, заголовки и код используют те же контуры
 CM-Super, что и исходный LaTeX-отчёт; цветовая тема SQL-листингов находится в
 `poly-report/themes/lovelace.tmTheme`.
 

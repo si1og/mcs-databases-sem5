@@ -1,4 +1,4 @@
-#import "../../../../../../poly-report/poly-report.typ": *
+#import "@local/poly-report:0.1.0": *
 
 == Лабораторная работа № 1
 === Задача
